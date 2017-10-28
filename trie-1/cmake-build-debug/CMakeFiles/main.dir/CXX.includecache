@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/main.cpp
+string
+-
+iostream
+-
+trie.hpp
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/trie.hpp
+
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/trie.hpp
+string
+-
+vector
+-
+

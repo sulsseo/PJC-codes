@@ -1,0 +1,4 @@
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/cmake-build-debug/CMakeFiles/main.dir
+/Users/mac/ownCloud/05-semestr/PJC/trie-1/cmake-build-debug/CMakeFiles/tests.dir
