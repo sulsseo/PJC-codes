@@ -140,8 +140,6 @@ dkms.conf
 .gitignore
 .idea/
 PJC - mara/
-inita/
-initb/
 pjc01/
 prednasky/
 small1/cmake-build-debug/CMakeFiles/3.8.2/CompilerIdC/tmp/
