@@ -7,20 +7,14 @@
 
 using namespace std;
 
+void init(trie &trie) {
+    trie.root = new trie_node;
+}
+
 int main() {
 
-    trie_node *node = new trie_node;
-    cout << "alok: " << node << endl;
-    cout << node->is_terminal << endl;
-
-
-    delete node;
-
-    cout << "dealok: " << node << endl;
-    cout << node->is_terminal << endl;
-
-    
-    string str = "word";
-    cout << str[0] << endl;
-    cout << str[2] << endl;
+    struct trie trie;
+    init(trie);
+    delete trie.root;
+    cout<<"je to moje"<<endl;
 }

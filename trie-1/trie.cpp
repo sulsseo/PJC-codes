@@ -98,6 +98,7 @@ void init(trie &trie) {
     trie.root = new trie_node;
 }
 
+/*
 bool erase(trie_node *node, std::string str) {
     if (str.size() == 0) {
         // end of string
@@ -149,17 +150,74 @@ bool erase(trie &trie, const std::string &str) {
     }
     return false;
 }
+*/
 
-void deallocate(trie_node* node) {
-    for (trie_node* &child : node->children) {
-        if(child != nullptr) {
-            deallocate(child);
-        } else break;
+/*
+ * get index of equal char
+ */
+bool erase(trie_node *node, const std::string &str, int index) {
+    if (index+1 == str.size()) {
+        // in important node
+        if (node->is_terminal) {
+            node->is_terminal = false;
+            if (node->children[0] == nullptr) {
+                delete node; // not deleting children full of nulls
+//                node= nullptr;
+                return true;
+            } else return true;
+        } else return false;
+    }
+
+    int i = 0;
+    while (i <= num_chars) {
+        if (node->children[i] == nullptr) {
+            return false;
+        } else if (node->children[i]->payload == str[index + 1]) {
+            if (erase(node->children[i], str, index + 1)) {
+                // succ deleting clean this node and return true
+                if (node->is_terminal) {
+                    return true;
+                } else {
+                    if (node->children[0] == nullptr) {
+                        delete node;
+//                        node= nullptr;
+                        return true;
+                    } else return true;
+                }
+            } else return false;
+        }
+        ++i;
     }
 }
 
+bool erase(trie &trie, const std::string &str) {
+    int i = 0;
+    while (i <= num_chars) {
+        if (trie.root->children[i] == nullptr) {
+            return false;
+        } else if (trie.root->children[i]->payload == str[0]) {
+            // got child
+            if (erase(trie.root->children[i], str, 0)) {
+                trie.size--;
+                return true;
+            } else return false;
+        }
+        ++i;
+    }
+    return false;
+}
+
+void deallocate(trie_node *node) {
+    for (trie_node *&child : node->children) {
+        if (child != nullptr) {
+            deallocate(child);
+        } else break;
+    }
+    delete node;
+}
+
 void deallocate(trie &trie) {
-    for (trie_node* &child : trie.root->children) {
+    for (trie_node *&child : trie.root->children) {
         if (child != nullptr) {
             deallocate(child);
         } else break;

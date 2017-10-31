@@ -45,6 +45,7 @@ TEST_CASE("Basics: inserts") {
     }
 }
 
+
 TEST_CASE("Basics: erase") {
     trie trie;
     init(trie);
