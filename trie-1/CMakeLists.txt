@@ -10,9 +10,9 @@ set(SOURCE_FILES
         trie.hpp)
 add_executable(tests ${SOURCE_FILES})
 
-project(main)
+project(trie)
 set(CMAKE_CXX_STANDARD 14)
 set(SOURCE_FILES
         main.cpp
         )
-add_executable(main ${SOURCE_FILES})
+add_executable(trie ${SOURCE_FILES})

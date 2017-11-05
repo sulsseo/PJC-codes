@@ -12,9 +12,9 @@ void init(trie &trie) {
 }
 
 int main() {
-
-    struct trie trie;
-    init(trie);
-    delete trie.root;
-    cout<<"je to moje"<<endl;
+    trie_node *struct_field[10];
+    struct_field[1] = new trie_node;
+    struct_field[1]->payload = 'a';
+    struct_field[1]->is_terminal = true;
+    cout << struct_field[1]->payload << endl;
 }
