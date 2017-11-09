@@ -163,3 +163,16 @@ void deallocate(trie_node *node) {
 //bool empty1(const trie &trie) {
 //    return trie.size == 0;
 //}
+
+bool has_word1(const trie_node *node, const trie_node *prev) {
+    if (prev != nullptr) {
+        // browse next children
+        for (trie_node *child : node->children) {
+            if (child == prev) {
+                continue;
+            } else return child != nullptr;
+        }
+    } else {
+        return has_word1(node->parent, node);
+    }
+}
