@@ -1,24 +1,20 @@
 #include "trie.hpp"
 
-#include <utility>
-#include <algorithm>
 #include <sstream>
 #include <iostream>
 
 using namespace std;
 
 trie::trie() :
-    m_root(new trie_node),
-    m_size(0)
-{
+        m_root(new trie_node),
+        m_size(0) {
 
 }
 
-trie::trie(const std::vector<std::string>& strings) :
-    m_root(new trie_node),
-    m_size(0)
-{
-    for (std::string s : strings) {
+trie::trie(const std::vector<std::string> &strings) :
+        m_root(new trie_node),
+        m_size(0) {
+    for (const std::string &s : strings) {
         insert(s);
     }
 }
@@ -59,7 +55,7 @@ bool insert1(trie_node *node, std::string str) {
     return false;
 }
 
-bool trie::insert(const std::string& str) {
+bool trie::insert(const std::string &str) {
     char inspect = 0;
 
     if (!str.empty()) inspect = str.at(0);
@@ -106,7 +102,7 @@ bool contains1(trie_node *node, std::string str) {
     return false;
 }
 
-bool trie::contains(const std::string& str) const {
+bool trie::contains(const std::string &str) const {
     char inspect = 0;
     if (m_size == 0) return false;
     if (!str.empty()) inspect = str.at(0);
@@ -122,7 +118,7 @@ bool trie::contains(const std::string& str) const {
 }
 
 bool erase1(trie_node *node, const std::string &str, size_t index) {
-    if (index+1 == str.size()) {
+    if (index + 1 == str.size()) {
         // in important node
         if (node->is_terminal) {
             node->is_terminal = false;
@@ -167,18 +163,86 @@ bool trie::empty() const {
     return m_size == 0;
 }
 
+void search_by_prefix1(const trie_node *node,
+                       const std::string &str,
+                       const std::string &word,
+                       std::vector<std::string> &storage) {
 
-std::vector<std::string> trie::search_by_prefix(const std::string& str) const {
-    return {};
+    if (str.size() <= word.size()) {
+        if (node->is_terminal && !word.empty()) {
+            storage.push_back(word);
+        }
+        for (trie_node *child : node->children) {
+            if (child != nullptr) {
+                search_by_prefix1(child, str, word + child->payload, storage);
+            } else return;
+        }
+    } else {
+        for (trie_node *child : node->children) {
+            if (child == nullptr) return;
+            else if (child->payload == str[word.size()]) {
+                search_by_prefix1(child, str, word + child->payload, storage);
+            }
+        }
+    }
 }
 
-std::vector<std::string> trie::get_prefixes(const std::string& str) const {
-    return {};
+std::vector<std::string> trie::search_by_prefix(const std::string &str) const {
+    std::string word;
+    std::vector<std::string> storage;
+
+    for (trie_node *child : m_root->children) {
+        if (child == nullptr) {
+            break;
+        } else if (str.empty()) {
+            word += child->payload;
+            search_by_prefix1(child, str, word, storage);
+        } else if (child->payload == str[0]) {
+            word += child->payload;
+            search_by_prefix1(child, str, word, storage);
+            break;
+        }
+    }
+
+    return storage;
 }
 
-// DONE
+void get_prefixes1(const trie_node *node,
+                   const std::string &str,
+                   const std::string &pref,
+                   std::vector<std::string> &storage) {
+    if (str.size() >= pref.size()) {
+        if (node->is_terminal && !pref.empty()) {
+            storage.push_back(pref);
+        }
+        for (trie_node *child : node->children) {
+            if (child == nullptr) break;
+            else if (child->payload == str[pref.size()]) {
+                get_prefixes1(child, str, pref + child->payload, storage);
+            }
+        }
+    } else return;
+}
+
+std::vector<std::string> trie::get_prefixes(const std::string &str) const {
+    std::vector<std::string> storage;
+    std::string pref;
+
+    for (trie_node *child : m_root->children) {
+        if (child == nullptr || str.empty()) {
+            break;
+        } else if (child->payload == str[0]) {
+            pref += child->payload;
+            get_prefixes1(child, str, pref, storage);
+            break;
+        }
+    }
+
+    return storage;
+}
+
 word_cursor trie::get_word_cursor() const {
-    return word_cursor(m_root);
+    return {m_root};
 }
 
 /*
@@ -190,7 +254,7 @@ bool has_word1(const trie_node *node, const trie_node *prev, const trie_node *pt
 
     if (prev == nullptr) {
         // go down
-        for (auto child : node->children) {
+        for (trie_node *child : node->children) {
             if (child == nullptr) {
                 break;
             } else {
@@ -204,7 +268,7 @@ bool has_word1(const trie_node *node, const trie_node *prev, const trie_node *pt
     } else {
         // go up
         bool after_from_node = false;
-        for (auto child : node->children) {
+        for (trie_node *child : node->children) {
             if (child == prev) {
                 after_from_node = true;
             } else if (child != nullptr && after_from_node) {
@@ -219,21 +283,17 @@ bool has_word1(const trie_node *node, const trie_node *prev, const trie_node *pt
 }
 
 
-// DONE
 bool word_cursor::has_word() const {
     return m_ptr != nullptr;
 }
 
-std::vector<char> read_word1(const trie_node *node, std::vector<char> &word) {
+void read_word1(const trie_node *node, std::vector<char> &word) {
     if (node->parent != nullptr) {
         word.insert(word.begin(), node->payload);
-        return read_word1(node->parent, word);
-    } else {
-        return word;
-    }
+        read_word1(node->parent, word);
+    } else return;
 }
 
-// DONE
 std::string word_cursor::read_word() const {
     std::vector<char> word;
     read_word1(m_ptr, word);
@@ -241,9 +301,10 @@ std::string word_cursor::read_word() const {
 
     if (word[0] == 0) return "";
 
-    for (int i = 0; i < word.size(); ++i) {
-        ss << word[i];
+    for (char letter : word) {
+        ss << letter;
     }
+
     return ss.str();
 }
 
@@ -251,13 +312,13 @@ std::string word_cursor::read_word() const {
  * when go down:    go to most left child, prev == nullptr
  * when go up:      go to parent, prev == from node
  */
-const trie_node* move_to_next_word1(const trie_node *node, const trie_node *prev, const trie_node* ptr) {
+const trie_node *move_to_next_word1(const trie_node *node, const trie_node *prev, const trie_node *ptr) {
 
     if (node->is_terminal && node != ptr && prev == nullptr) return node;
 
     if (prev == nullptr) {
         // go down
-        for (auto child : node->children) {
+        for (trie_node *child : node->children) {
             if (child == nullptr) {
                 break;
             } else {
@@ -271,7 +332,7 @@ const trie_node* move_to_next_word1(const trie_node *node, const trie_node *prev
     } else {
         // go up
         bool after_from_node = false;
-        for (auto child : node->children) {
+        for (trie_node *child : node->children) {
             if (child == prev) {
                 after_from_node = true;
             } else if (child != nullptr && after_from_node) {
@@ -297,8 +358,7 @@ void word_cursor::move_to_next_word() {
     }
 }
 
-word_cursor::word_cursor(const trie_node* ptr) :
-    m_ptr(ptr)
-{
+word_cursor::word_cursor(const trie_node *ptr) :
+        m_ptr(ptr) {
     move_to_next_word();
 }
