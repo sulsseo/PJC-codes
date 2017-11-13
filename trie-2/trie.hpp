@@ -107,14 +107,3 @@ private:
     trie_node *m_root = nullptr;
     size_t m_size = 0;
 };
-
-
-bool insert1(trie_node *node, std::string str);
-
-bool contains1(trie_node *node, std::string str);
-
-bool erase1(trie_node *node, const std::string &str, size_t index);
-
-void deallocate(trie_node *node);
-
-bool has_word1(const trie_node *node, const trie_node *prev);
