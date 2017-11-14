@@ -140,7 +140,7 @@ int main(int argc, char **argv) {
 //    test02();
     test03();
 
-    std::vector
+    std::vector;
     clock_t  end = clock();
     cout<<endl<<"Runtime: "<<(end-start)<<" ms"<<endl;
     return 0;
