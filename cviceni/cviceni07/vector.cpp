@@ -104,5 +104,20 @@ void vector::swap(vector &rhs) {
 }
 
 T_vectorData vector::operator[](std::size_t index) const {
-
+    if (index < m_size) {
+        return m_data[index];
+    }
 }
+
+std::ostream &vector::operator<<(std::ostream &out, const vector &v) {
+    out << "capacity: " << m_capacity;
+    out << "size: " << m_size;
+    size_t index = 0;
+    size_t index_max = v.size() - 1;
+    while (index < index_max) {
+        out << v[index] << ", ";
+        ++index;
+    }
+    out << std::endl;
+}
+

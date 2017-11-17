@@ -18,6 +18,7 @@ public:
     vector& operator=(const vector& rhs);
     vector& operator=(vector&& rhs);
     T_vectorData operator[](std::size_t index) const;
+    std::ostream& operator<<(std::ostream &out, const vector &v);
 
     void reserve(size_t cap);
     void resize(size_t sz, double val = 0);

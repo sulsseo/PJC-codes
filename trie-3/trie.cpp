@@ -1,35 +1,43 @@
 #include "trie.hpp"
 
-#include <sstream>
-#include <iostream>
+/*********************** Trie methods ***************************/
 
-using namespace std;
-
-trie::trie() :
-        m_root(new trie_node),
-        m_size(0) {
-
-}
-
-trie::trie(const std::vector<std::string> &strings) :
-        m_root(new trie_node),
-        m_size(0) {
-    for (const std::string &s : strings) {
-        insert(s);
+bool erase1(trie_node *node, const std::string &str, size_t index) {
+    if (index + 1 == str.size()) {
+        // in important node
+        if (node->is_terminal) {
+            node->is_terminal = false;
+            return true;
+        } else return false;
     }
-}
 
-void deallocate(trie_node *node) {
-    for (trie_node *&child : node->children) {
-        if (child != nullptr) {
-            deallocate(child);
-        } else break;
+    size_t i = 0;
+    while (i < num_chars) {
+        if (node->children[i] == nullptr) {
+            return false;
+        } else if (node->children[i]->payload == str[index + 1]) {
+            return erase1(node->children[i], str, index + 1);
+        }
+        ++i;
     }
-    delete node;
+    return false;
 }
 
-trie::~trie() {
-    deallocate(m_root);
+bool trie::erase(const std::string &str) {
+    size_t i = 0;
+    while (i <= num_chars) {
+        if (m_root->children[i] == nullptr) {
+            return false;
+        } else if (m_root->children[i]->payload == str[0]) {
+            // got child
+            if (erase1(m_root->children[i], str, 0)) {
+                m_size--;
+                return true;
+            } else return false;
+        }
+        ++i;
+    }
+    return false;
 }
 
 bool insert1(trie_node *node, std::string str) {
@@ -117,43 +125,58 @@ bool trie::contains(const std::string &str) const {
     return false;
 }
 
-bool erase1(trie_node *node, const std::string &str, size_t index) {
-    if (index + 1 == str.size()) {
-        // in important node
-        if (node->is_terminal) {
-            node->is_terminal = false;
-            return true;
-        } else return false;
-    }
+/**************************************************/
 
-    size_t i = 0;
-    while (i < num_chars) {
-        if (node->children[i] == nullptr) {
-            return false;
-        } else if (node->children[i]->payload == str[index + 1]) {
-            return erase1(node->children[i], str, index + 1);
-        }
-        ++i;
-    }
-    return false;
+trie::trie() :
+        m_root(new trie_node),
+        m_size(0) {
 }
 
-bool trie::erase(const std::string &str) {
-    size_t i = 0;
-    while (i <= num_chars) {
-        if (m_root->children[i] == nullptr) {
-            return false;
-        } else if (m_root->children[i]->payload == str[0]) {
-            // got child
-            if (erase1(m_root->children[i], str, 0)) {
-                m_size--;
-                return true;
-            } else return false;
-        }
-        ++i;
+trie::trie(const std::vector<std::string> &strings) :
+        m_root(new trie_node),
+        m_size(0) {
+    for (const std::string &s : strings) {
+        insert(s);
     }
-    return false;
 }
+
+trie::trie(const trie& rhs) :
+        m_root(rhs.m_root),
+        m_size(rhs.m_size)
+{
+
+}
+
+trie::trie(trie&& rhs) : trie()
+{
+    swap(rhs);
+}
+
+trie& trie::operator=(const trie& rhs) {
+    trie tmp(rhs);
+    swap(tmp);
+    return *this;
+}
+
+trie& trie::operator=(trie&& rhs) {
+    swap(rhs);
+    return *this;
+}
+
+void deallocate(trie_node *node) {
+    for (trie_node *&child : node->children) {
+        if (child != nullptr) {
+            deallocate(child);
+        } else break;
+    }
+    delete node;
+}
+
+trie::~trie() {
+    deallocate(m_root);
+}
+
+/**************************************************/
 
 size_t trie::size() const {
     return m_size;
@@ -241,9 +264,7 @@ std::vector<std::string> trie::get_prefixes(const std::string &str) const {
     return storage;
 }
 
-word_cursor trie::get_word_cursor() const {
-    return {m_root};
-}
+/**************************************************/
 
 ///*
 // * PRE-order searching strategy
@@ -282,7 +303,7 @@ word_cursor trie::get_word_cursor() const {
 //    }
 //}
 
-
+/*
 bool word_cursor::has_word() const {
     return m_ptr != nullptr;
 }
@@ -294,7 +315,7 @@ void read_word1(const trie_node *node, std::vector<char> &word) {
     } else return;
 }
 
-std::string word_cursor::read_word() const {
+std::string read_word() const {
     std::vector<char> word;
     read_word1(m_ptr, word);
     std::stringstream ss;
@@ -307,11 +328,71 @@ std::string word_cursor::read_word() const {
 
     return ss.str();
 }
+*/
+
+
+trie::const_iterator trie::begin() const {
+
+    return {};
+}
+
+trie::const_iterator trie::end() const {
+    return {};
+}
+
+// DONE
+void trie::swap(trie& rhs) {
+    m_root = rhs.m_root;
+    m_size = rhs.m_size;
+}
+
+bool trie::operator==(const trie& rhs) const {
+    return true;
+}
+
+bool trie::operator<(const trie& rhs) const {
+    return false;
+}
+
+trie trie::operator&(trie const& rhs) const {
+    return {};
+}
+
+trie trie::operator|(trie const& rhs) const {
+    return {};
+}
+
+bool operator!=(const trie& lhs, const trie& rhs) {
+	return !(lhs == rhs);
+}
+
+bool operator>(const trie& lhs, const trie& rhs) {
+	return rhs < lhs;
+}
+
+bool operator<=(const trie& lhs, const trie& rhs) {
+	return !(lhs > rhs);
+}
+
+bool operator>=(const trie& lhs, const trie& rhs) {
+	return !(lhs < rhs);
+}
+
+void swap(trie& lhs, trie& rhs) {
+    lhs.swap(rhs);
+}
+
+std::ostream& operator<<(std::ostream& out, trie const& trie) {
+    return out;
+}
+
+/**************************************************/
+
 
 /*
  * when go down:    go to most left child, prev == nullptr
  * when go up:      go to parent, prev == from node
- */
+ *//*
 const trie_node *move_to_next_word1(const trie_node *node, const trie_node *prev, const trie_node *ptr) {
 
     if (node->is_terminal && node != ptr && prev == nullptr) return node;
@@ -356,9 +437,28 @@ void word_cursor::move_to_next_word() {
     } else {
         cerr << "no way..." << endl;
     }
+}*/
+
+trie::const_iterator& trie::const_iterator::operator++() {
+    return *this;
 }
 
-word_cursor::word_cursor(const trie_node *ptr) :
-        m_ptr(ptr) {
-    move_to_next_word();
+trie::const_iterator trie::const_iterator::operator++(int) {
+    return {};
+}
+
+trie::const_iterator::const_iterator(const trie_node* node) {
+    current_node = node;
+}
+
+bool trie::const_iterator::operator==(const trie::const_iterator& rhs) const {
+    return const_iterator == rhs.current_node;
+}
+
+bool trie::const_iterator::operator!=(const trie::const_iterator& rhs) const {
+    return false;
+}
+
+trie::const_iterator::reference trie::const_iterator::operator*() const {
+    return {};
 }
