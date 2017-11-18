@@ -288,7 +288,7 @@ TEST_CASE("Copy") {
         trie t1({"a", "b", "c", "d"});
         trie t2({"A", "B", "C", "D"});
         SECTION("Simple assignment") {
-            t1 = t2;
+            t1 = t2; // TODO: this operation not work properly
             VALIDATE_SETS(extract_all(t1), as_vec({ "A", "B", "C", "D" }));
             VALIDATE_SETS(extract_all(t2), as_vec({ "A", "B", "C", "D" }));
         }
