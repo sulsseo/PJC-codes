@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(trie-3)
 set(CMAKE_CXX_STANDARD 14)
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES
+        main.cpp
+        trie.cpp
+        )
 add_executable(trie-3 ${SOURCE_FILES})
 
 project(tests)

@@ -127,15 +127,15 @@ bool trie::contains(const std::string &str) const {
     return false;
 }
 
-trie_node *deep_copy(const trie_node *node) {
+trie_node *deep_copy(trie_node *parent, trie_node *node) {
     auto copy_node = new trie_node;
     copy_node->payload = node->payload;
     copy_node->is_terminal = node->is_terminal;
-    copy_node->parent = node->parent;
+    copy_node->parent = parent;
 
     for (int i = 0; i < num_chars; ++i) {
         if (node->children[i] == nullptr) break;
-        copy_node->children[i] = deep_copy(node->children[i]);
+        copy_node->children[i] = deep_copy(copy_node, node->children[i]);
     }
 
     return copy_node;
@@ -158,10 +158,10 @@ trie::trie(const std::vector<std::string> &strings) :
 
 // copy constructor
 trie::trie(const trie &rhs) :
-        m_root(rhs.m_root),
+        m_root(nullptr),
         m_size(rhs.m_size) {
 // TODO: copy whole data to new instance
-    m_root = deep_copy(rhs.m_root);
+    m_root = deep_copy(nullptr, rhs.m_root);
 }
 
 trie::trie(trie &&rhs) : trie() {
@@ -340,14 +340,13 @@ trie::const_iterator trie::begin() const {
 
 // DONE
 trie::const_iterator trie::end() const {
-    const trie_node *ptr = move(m_root, nullptr, nullptr, m_size - 1);
-    return {ptr};
+    return {nullptr};
 }
 
 // DONE
 void trie::swap(trie &rhs) {
-    m_root = rhs.m_root;
-    m_size = rhs.m_size;
+    std::swap(m_root, rhs.m_root);
+    std::swap(m_size, rhs.m_size);
 }
 
 /**************************************************/
@@ -376,33 +375,72 @@ std::string read_word(const trie_node *node) {
 std::vector<std::string> read_trie_dict(const trie_node *t) {
     std::vector<std::string> storage;
 
-    while (t != nullptr) {
+    while (true) {
         t = move(t, nullptr, t, 0);
+        if (t == nullptr) break;
+
         storage.push_back(read_word(t));
     }
 
     return storage;
 }
 
+// DONE
 bool trie::operator==(const trie &rhs) const {
-    if (m_size != rhs.m_size)
-        return false;
+    if (m_size != rhs.m_size) return m_size == 0;
 
     std::vector<std::string> t1 = read_trie_dict(m_root);
     std::vector<std::string> t2 = read_trie_dict(rhs.m_root);
 
+    // sort resulting lists
+    sort(t1.begin(), t1.end());
+    sort(t2.begin(), t2.end());
+
     return t1 == t2;
 }
 
+// TODO: compare operator
 bool trie::operator<(const trie &rhs) const {
+
     return false;
 }
 
+// TODO: common this and rhs
 trie trie::operator&(trie const &rhs) const {
+//    std::vector<std::string> v;
+//    trie::const_iterator iterator;
+//
+//    std::vector<std::string> t1 = {begin(), end()};
+//    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
+//
+//    std::sort(t1.begin(), t1.end());
+//    std::sort(t2.begin(), t2.end());
+//
+//    std::set_intersection(t1.begin(), t1.end(), t2.begin(), t2.end(), v.begin());
+
+
     return {};
 }
 
+// TODO: union this and rhs
 trie trie::operator|(trie const &rhs) const {
+//    std::vector<std::string> v;
+//    trie::const_iterator iterator;
+//
+//    std::vector<std::string> t1 = {begin(), end()};
+//    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
+//
+//    std::sort(t1.begin(), t1.end());
+//    std::sort(t2.begin(), t2.end());
+//
+//    if (t1.empty()) {
+//        return {t2};
+//    } else if (t2.empty()) {
+//        return {t1};
+//    }
+//
+//    std::set_union(t1.begin(), t1.end(), t2.begin(), t2.end(), v.begin());
+
     return {};
 }
 
@@ -427,32 +465,41 @@ void swap(trie &lhs, trie &rhs) {
 }
 
 std::ostream &operator<<(std::ostream &out, trie const &trie) {
+    out << "size: " << trie.size();
     return out;
 }
 
 /**************************************************/
 
-
+// DONE
 trie::const_iterator &trie::const_iterator::operator++() {
+    current_node = move(current_node, nullptr, current_node, 0);
     return *this;
 }
 
+// DONE
 trie::const_iterator trie::const_iterator::operator++(int) {
-    return {};
+    current_node = move(current_node, nullptr, current_node, 0);
+    return *this;
 }
 
+// DONE
 trie::const_iterator::const_iterator(const trie_node *node) {
     current_node = node;
 }
 
+// DONE
 bool trie::const_iterator::operator==(const trie::const_iterator &rhs) const {
     return current_node == rhs.current_node;
 }
 
+// DONE
 bool trie::const_iterator::operator!=(const trie::const_iterator &rhs) const {
-    return false;
+    return current_node != rhs.current_node;
 }
 
+// DONE
 trie::const_iterator::reference trie::const_iterator::operator*() const {
-    return {};
+    std::string word = read_word(current_node);
+    return word;
 }
