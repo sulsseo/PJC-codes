@@ -160,7 +160,6 @@ trie::trie(const std::vector<std::string> &strings) :
 trie::trie(const trie &rhs) :
         m_root(nullptr),
         m_size(rhs.m_size) {
-// TODO: copy whole data to new instance
     m_root = deep_copy(nullptr, rhs.m_root);
 }
 
@@ -399,49 +398,34 @@ bool trie::operator==(const trie &rhs) const {
     return t1 == t2;
 }
 
-// TODO: compare operator
 bool trie::operator<(const trie &rhs) const {
-
     return false;
 }
 
-// TODO: common this and rhs
 trie trie::operator&(trie const &rhs) const {
-//    std::vector<std::string> v;
-//    trie::const_iterator iterator;
-//
-//    std::vector<std::string> t1 = {begin(), end()};
-//    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
-//
-//    std::sort(t1.begin(), t1.end());
-//    std::sort(t2.begin(), t2.end());
-//
-//    std::set_intersection(t1.begin(), t1.end(), t2.begin(), t2.end(), v.begin());
+    std::vector<std::string> v;
+    std::vector<std::string> t1 = {begin(), end()};
+    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
 
+    std::sort(t1.begin(), t1.end());
+    std::sort(t2.begin(), t2.end());
 
-    return {};
+    std::set_intersection(t1.begin(), t1.end(), t2.begin(), t2.end(), back_inserter(v));
+
+    return {v};
 }
 
-// TODO: union this and rhs
 trie trie::operator|(trie const &rhs) const {
-//    std::vector<std::string> v;
-//    trie::const_iterator iterator;
-//
-//    std::vector<std::string> t1 = {begin(), end()};
-//    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
-//
-//    std::sort(t1.begin(), t1.end());
-//    std::sort(t2.begin(), t2.end());
-//
-//    if (t1.empty()) {
-//        return {t2};
-//    } else if (t2.empty()) {
-//        return {t1};
-//    }
-//
-//    std::set_union(t1.begin(), t1.end(), t2.begin(), t2.end(), v.begin());
+    std::vector<std::string> v;
+    std::vector<std::string> t1 = {begin(), end()};
+    std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
 
-    return {};
+    std::sort(t1.begin(), t1.end());
+    std::sort(t2.begin(), t2.end());
+
+    std::set_union(t1.begin(), t1.end(), t2.begin(), t2.end(), back_inserter(v));
+
+    return {v};
 }
 
 bool operator!=(const trie &lhs, const trie &rhs) {
@@ -471,34 +455,28 @@ std::ostream &operator<<(std::ostream &out, trie const &trie) {
 
 /**************************************************/
 
-// DONE
 trie::const_iterator &trie::const_iterator::operator++() {
     current_node = move(current_node, nullptr, current_node, 0);
     return *this;
 }
 
-// DONE
 trie::const_iterator trie::const_iterator::operator++(int) {
     current_node = move(current_node, nullptr, current_node, 0);
     return *this;
 }
 
-// DONE
 trie::const_iterator::const_iterator(const trie_node *node) {
     current_node = node;
 }
 
-// DONE
 bool trie::const_iterator::operator==(const trie::const_iterator &rhs) const {
     return current_node == rhs.current_node;
 }
 
-// DONE
 bool trie::const_iterator::operator!=(const trie::const_iterator &rhs) const {
     return current_node != rhs.current_node;
 }
 
-// DONE
 trie::const_iterator::reference trie::const_iterator::operator*() const {
     std::string word = read_word(current_node);
     return word;
