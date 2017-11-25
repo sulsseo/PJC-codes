@@ -406,7 +406,7 @@ trie trie::operator&(trie const &rhs) const {
     std::vector<std::string> v;
     std::vector<std::string> t1 = {begin(), end()};
     std::vector<std::string> t2 = {rhs.begin(), rhs.end()};
-
+    
     std::sort(t1.begin(), t1.end());
     std::sort(t2.begin(), t2.end());
 
