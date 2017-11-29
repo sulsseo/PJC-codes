@@ -13,7 +13,7 @@ struct operation {
     char assiociativity;
 };
 
-/************** Tree classes *******************/
+/************** Result class *******************/
 
 
 class result : public expr {
@@ -21,21 +21,24 @@ private:
     double value;
 
     friend std::ostream &operator<<(std::ostream &out, const result &r) {
-        out << "result: " << endl;
-        return out;
+        return out << r.evaluate();
+    }
+
+    void write(std::ostream &out) const {
+        out << "";
     }
 
 public:
     result(double a) : value(a) {}
 
-    ~result() = default;
+    virtual ~result() = default;
 
-    double evaluate() {
+    virtual double evaluate() const {
         return value;
     }
 };
 
-/************** END Tree classes *******************/
+/************** END Result class *******************/
 
 
 bool is_number(const std::string token) {
@@ -63,7 +66,7 @@ char get_associativity(const char c) {
     else return 'L';
 }
 
-std::string make_clear(const std::string data) {
+std::string clear_csv(const std::string data) {
     stringstream sin(data);
     stringstream sout;
 
@@ -95,7 +98,7 @@ std::string make_clear(const std::string data) {
             cout << "not processed: " << (char) token << endl;
         }
     }
-    sout << ";";
+//    sout << ";";
     return sout.str();
 }
 
@@ -113,12 +116,10 @@ std::string make_clear(const std::string data) {
  */
 std::stringstream shunting_yard(const std::string infix) {
     string token;
-    string clear_infix = make_clear(infix);
+    string clear_infix = clear_csv(infix);
     stringstream sout;
     stringstream sin(clear_infix);
     stack<operation> operators;
-
-    // todo: learn to split only by whitespace
 
     while (getline(sin, token, ';')) {
         if (is_number(token)) {
@@ -155,9 +156,10 @@ std::unique_ptr<expr> create_expression_tree(const std::string &expression) {
     string token;
     stringstream data = shunting_yard(expression);
 
-    int counter = 0;
     while (getline(data, token, ';')) {
-        if (is_number(token)) {
+        if (token.empty()) {
+            break;
+        } else if (is_number(token)) {
             stack.push(stod(token));
         } else {
             double num1, num2;
@@ -170,16 +172,16 @@ std::unique_ptr<expr> create_expression_tree(const std::string &expression) {
                     stack.push(num1 + num2);
                     break;
                 case '-':
-                    num1 = stack.top();
-                    stack.pop();
                     num2 = stack.top();
+                    stack.pop();
+                    num1 = stack.top();
                     stack.pop();
                     stack.push(num1 - num2);
                     break;
                 case '/':
-                    num1 = stack.top();
-                    stack.pop();
                     num2 = stack.top();
+                    stack.pop();
+                    num1 = stack.top();
                     stack.pop();
                     try {
                         stack.push(num1 / num2);
@@ -196,9 +198,9 @@ std::unique_ptr<expr> create_expression_tree(const std::string &expression) {
                     stack.push(num1 * num2);
                     break;
                 case '^':
-                    num1 = stack.top();
-                    stack.pop();
                     num2 = stack.top();
+                    stack.pop();
+                    num1 = stack.top();
                     stack.pop();
                     stack.push(pow(num1, num2));
                     break;
@@ -208,8 +210,9 @@ std::unique_ptr<expr> create_expression_tree(const std::string &expression) {
             }
         }
     }
-    std::unique_ptr<expr> ptr = std::make_unique<result>(result(stack.top()));
-    return ptr;
+    std::unique_ptr<result> r(new result(stack.top()));
+    std::unique_ptr<expr> ret = std::move(r);
+    return ret;
 
 }
 

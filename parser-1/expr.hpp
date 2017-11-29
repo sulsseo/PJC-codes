@@ -13,7 +13,8 @@ private:
     friend std::ostream &operator<<(std::ostream &, const expr &);
 
 public:
-    double virtual evaluate() const = 0;
+//    double virtual evaluate() const = 0;
+    virtual double evaluate() const = 0;
 
     virtual ~expr() = default;
 };
