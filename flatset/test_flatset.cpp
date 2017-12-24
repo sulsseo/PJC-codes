@@ -1,4 +1,5 @@
-#include "flatset.hpp"
+//#include "flatset.hpp"
+#include "flatset.h"
 #include "tests-helpers.hpp"
 #include "catch.hpp"
 
