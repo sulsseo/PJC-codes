@@ -1,6 +1,8 @@
-Semestral work
+#Semestral work
 
-<počet-vrcholů> <počet-hran>
+**<počet-vrcholů> <počet-hran>**
+
 0 <počet hran z vrcholu 0> <cílový vrchol 1> <délka 1. hrany> <cílový vrchol 2> <délka 2. hrany> ...
+
 1 <počet hran z vrcholu 1> <cílový vrchol 1> <délka 1. hrany> <cílový vrchol 2> <délka 2. hrany> ...
 ...
