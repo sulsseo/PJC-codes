@@ -269,6 +269,8 @@ public:
         return first;
     }
     const_iterator lower_bound(T const& t) const {
+        // TODO: can use find!!!
+        // TOOD: find place to insert new element
         auto it = end();
         auto first = begin();
 
