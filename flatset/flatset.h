@@ -35,39 +35,29 @@ private:
 
 public:
     // These types need to be accesible from the outside:
-    // iterator
-//    using iterator = T*;
-    // const_iterator
-//    using const_iterator = const T*;
+
     // size_type
     using size_type = size_t;
+
     // value_type
-//    using value_type = const T&;
     using value_type = T;
 
-    class const_iterator {
-        const T *m_ptr = nullptr;
-    public:
-        const_iterator() = default;
-        const_iterator(const T *ptr) { m_ptr = ptr; }
+//    using iterator = T*;
 
-        const_iterator& operator++() { ++m_ptr; return *this; }
-        const_iterator operator++(int) { ++m_ptr; return this; }
-
-        const_iterator& operator--() { --m_ptr; return *this; }
-        const_iterator operator--(int) { --m_ptr; return this; }
-
-        bool operator==(const const_iterator & rhs) const { return this->m_ptr == rhs.m_ptr; }
-        bool operator!=(const const_iterator & rhs) const { return this->m_ptr != rhs.m_ptr; }
-        T& operator*() { return *m_ptr; }
-    };
-
+    // iterator
     class iterator {
-    private:
-        T *m_ptr = nullptr;
+        T *m_ptr;
     public:
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = T;
+        using reference = T&;
+        using pointer = T*;
+
         iterator() = default;
         iterator(T *ptr) { m_ptr = ptr; }
+        iterator(const T& ptr) { m_ptr = ptr; }
+        ~iterator() = default;
 
         iterator& operator++() { ++m_ptr; return *this; }
         iterator operator++(int) { ++m_ptr; return this; }
@@ -77,8 +67,49 @@ public:
 
         bool operator==(const iterator & rhs) const { return this->m_ptr == rhs.m_ptr; }
         bool operator!=(const iterator & rhs) const { return this->m_ptr != rhs.m_ptr; }
+
         T& operator*() { return *m_ptr; }
+        iterator& operator=(const iterator& rhs) { std::swap(m_ptr, rhs.m_ptr); return *this; }
     };
+
+
+//    using const_iterator = const T*;
+
+//    // const_iterator
+//    class const_iterator {
+//        const T *m_ptr;
+//    public:
+//        using difference_type = std::ptrdiff_t;
+//        using iterator_category = std::bidirectional_iterator_tag;
+//        using value_type = T;
+//        using reference = T&;
+//        using pointer = T*;
+//
+//        const_iterator() = default;
+//        const_iterator(const T *ptr) { m_ptr = ptr; }
+//        ~const_iterator() = default;
+//
+//        const_iterator&     operator++()    { ++m_ptr; return *this; }
+//        const_iterator      operator++(int) { ++m_ptr; return this; }
+//
+//        const_iterator&     operator--()    { --m_ptr; return *this; }
+//        const_iterator      operator--(int) { --m_ptr; return this; }
+//
+//        bool operator==(const const_iterator & rhs) const { return this->m_ptr == rhs.m_ptr; }
+//        bool operator!=(const const_iterator & rhs) const { return this->m_ptr != rhs.m_ptr; }
+//
+//        T& operator*() { return *m_ptr; }
+//        const_iterator& operator=(const const_iterator& rhs) { std::swap(m_ptr, rhs.m_ptr); return *this; }
+//    };
+//
+//    // Iterator member functions
+    iterator begin() noexcept { return iterator(m_data.get()); }
+    iterator end() noexcept { return iterator(m_data.get() + m_size); }
+//    iterator end() noexcept { return nullptr; };
+    const_iterator begin() const noexcept { return const_iterator(m_data.get()); }
+    const_iterator end() const noexcept { return const_iterator(m_data.get() + m_size); }
+    const_iterator cbegin() const noexcept { return begin(); }
+    const_iterator cend() const noexcept { return end(); }
 
     // DONE
     // Special member functions
@@ -209,16 +240,6 @@ public:
 
     // Deletes element equal to key if it is present, returns how many elements were deleted
     size_type erase(value_type const& key);
-
-    // DONE
-    // Iterator member functions
-    iterator begin() noexcept { return iterator(m_data.get()); }
-//    iterator end() noexcept { return iterator(m_data.get() + m_size); }
-    iterator end() noexcept { return nullptr; };
-    const_iterator begin() const noexcept { return const_iterator(m_data.get()); }
-    const_iterator end() const noexcept { return const_iterator(m_data.get() + m_size); }
-    const_iterator cbegin() const noexcept { return begin(); }
-    const_iterator cend() const noexcept { return end(); }
 
     // DONE
     // The usual queries

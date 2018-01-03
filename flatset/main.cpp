@@ -35,6 +35,16 @@ void test() {
 int main() {
 
     int field[] = {1, 3, 5, 8, 4};
-    flat_set<int> set(field, field+5);
+//    flat_set<int> set(field, field+5);
+
+    vector<int> vec({1,2,3});
+    auto iter = vec.begin();
+    iter--;
+    auto citer = vec.cbegin();
+    citer--;
     
+    flat_set<int> set;
+    auto fiter = set.begin();
+    auto fciter = set.cbegin();
+    cout<<"end";
 }
