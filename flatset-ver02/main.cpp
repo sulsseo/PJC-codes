@@ -68,6 +68,6 @@ int main() {
 
     std::vector<int> range(m_data.begin(), m_data.end());
     cout << "a";
-    std::binary_search
+
 
 }

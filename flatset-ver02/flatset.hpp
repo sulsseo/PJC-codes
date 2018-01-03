@@ -60,115 +60,75 @@ public:
     void reserve(size_type c) { m_data.reserve(c); }
     void clear() { m_data.clear(); }
 
+    // Inserts [first, last) range of elements
     template <typename InputIterator>
     void insert(InputIterator first, InputIterator last) {
-        reserve(m_data.capacity() + std::distance(first, last));
-
-        std::vector<T> tmp(first, last);
-        std::sort(tmp.begin(), tmp.end(), m_comp);
-        auto it = tmp.begin();
-        auto inspect = tmp.end();
-
-        while (it != tmp.end()) {
-            if (!equal(*inspect, *it)) {
-                m_data.push_back(*it);
-                inspect = it;
-            }
-            ++it;
-        }
-
-        while (first != last) {
-            auto it = find(*first);
-            if (it == end()) m_data.push_back(*first);
-            ++first;
-        }
-
-        std::sort(begin(), end(), m_comp);
+        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
     }
 
     template <typename InputIterator>
     void insert(InputIterator first, InputIterator last, std::input_iterator_tag) {
-        std::vector<T> tmp(first, last);
-        std::sort(tmp.begin(), tmp.end(), m_comp);
-        auto it = tmp.begin();
-        auto inspect = tmp.end();
+        while(first != last) {
+            m_data.push_back(*first);
+            ++first;
+        }
 
-        while (it != tmp.end()) {
-            if (!equal(*inspect, *it)) {
-                m_data.push_back(*it);
+        std::sort(m_data.begin(), m_data.end(), m_comp);
+        std::vector<T> tmp;
+
+        auto it = m_data.begin();
+        auto inspect = m_data.end();
+
+        while(it != m_data.end()) {
+            if (it != inspect) {
+                tmp.push_back(*it);
                 inspect = it;
             }
             ++it;
         }
 
-        while (first != last) {
-            auto it = find(*first);
-            if (it == end()) m_data.push_back(*first);
-            ++first;
-        }
-
-        std::sort(begin(), end(), m_comp);
+        m_data = std::move(tmp);
     }
 
     template <typename ForwardIterator>
     void insert(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag) {
-        reserve(m_data.capacity() + std::distance(first, last));
+        // reserve
+        m_data.reserve(m_data.size() + std::distance(first, last));
 
-        std::vector<T> tmp(first, last);
-        std::sort(tmp.begin(), tmp.end(), m_comp);
-        auto it = tmp.begin();
-        auto inspect = tmp.end();
+        while(first!=last) {
+            // TODO: find duplic, resize
+            m_data.push_back(std::move(*first));
+            ++first;
+        }
 
-        while (it != tmp.end()) {
-            if (!equal(*inspect, *it)) {
-                m_data.push_back(*it);
+        std::sort(m_data.begin(), m_data.end(), m_comp);
+        std::vector<T> tmp;
+
+        auto it = m_data.begin();
+        auto inspect = m_data.end();
+
+        while (it != m_data.end()) {
+            if (it != inspect) {
+                tmp.push_back(std::move(*it));
                 inspect = it;
             }
             ++it;
         }
 
-        while (first != last) {
-            auto it = find(*first);
-            if (it == end()) m_data.push_back(*first);
-            ++first;
-        }
+        m_data = tmp;
 
-        std::sort(begin(), end(), m_comp);
     }
-
-
-    // Inserts [first, last) range of elements
-
 
     // Constructs flat_set from elements in range [first, last)
     template <typename InputIterator>
     flat_set(InputIterator first, InputIterator last) : m_data(), m_comp() {
-//        reserve(500'000);
-////        cout << last - first;
-//        for (InputIterator it = first; it != last ; ++it) {
-////            insert(*it);
-////            auto iter = find(*it);
-////            if (iter == end()) {
-//                m_data.push_back(std::move(*it));
-////            }
-//        }
-//        std::sort(m_data.begin(), m_data.end(), m_comp);
-//        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
-        insert(first, last);
+        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
+//        insert(first, last);
     }
     template <typename InputIterator>
     flat_set(InputIterator first, InputIterator last, Comparator const& cmp) : flat_set(cmp) {
-//        reserve(500'000);
-//        for (InputIterator it = first; it != last ; ++it) {
-////            insert(*it);
-////            auto iter = find(*it);
-////            if (iter == end()) {
-//                m_data.push_back(std::move(*it));
-////            }
-//        }
-//        std::sort(m_data.begin(), m_data.end(), cmp);
-//        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
-        insert(first, last);
+        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
+//        insert(first, last);
     }
 
     // Insert overloads
