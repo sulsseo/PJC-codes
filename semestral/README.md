@@ -1,4 +1,4 @@
-Semestral work
+#Semestral work
 
 **<počet-vrcholů> <počet-hran>**
 
