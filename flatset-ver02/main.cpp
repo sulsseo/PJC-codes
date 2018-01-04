@@ -42,12 +42,9 @@ int* bin_search2(size_t l, size_t r, int x)
     return {&data[7]};
 }
 
-int main() {
-//    std::pair<int, bool> ret = binarySearch(0, 7, 16);
-//    cout << ret.first << " " << ret.second;
+void resize() {
     std::vector<int>::iterator it;
-    std::vector<int> m_data({1,2,2,3,4,5,5,5,5,6,7,8,8,10,11,12});
-
+    std::vector<int> m_data({1,2,2,3,4,5,5,6,8,8,10,11,12});
     it = std::unique(m_data.begin(), m_data.end());
 //    m_data.resize((std::distance(m_data.begin(), it)));
     for (int i = 0; i < m_data.size(); ++i) {
@@ -67,7 +64,40 @@ int main() {
     cout<<std::distance(str.begin(), str.end());
 
     std::vector<int> range(m_data.begin(), m_data.end());
-    cout << "a";
+    cout << "a" << endl << endl;
 
+    for (int j = 0; j < m_data.size(); ++j) {
+        cout << endl << "pro " << data[j] << endl;
+    }
+}
+
+int main() {
+//    std::pair<int, bool> ret = binarySearch(0, 7, 16);
+//    cout << ret.first << " " << ret.second;
+    std::vector<int>::iterator it;
+    std::vector<int> m_data({1,2,2,3,4,5,5,6,8,8,10,11,12});
+    std::vector<int> m_data2({1,2,3,5,9,10});
+    std::vector<int> extreme({1,86});
+
+    int element =4;
+    auto up = std::upper_bound(m_data2.begin(), m_data2.end(), 3);
+    auto lo = std::lower_bound(m_data2.begin(), m_data2.end(), element);
+
+    cout << "u: " << *up << endl;
+    cout << "l: " << *lo << endl;
+
+    if (!(lo != m_data2.end() && element >= *lo)) {
+        m_data2.insert(lo, element);
+    }
+
+    for(it = m_data2.begin(); it != m_data2.end(); ++it) {
+        cout << *it << ",";
+    }
+    cout << endl;
+
+    cout << std::binary_search(extreme.begin(), extreme.end(), 2);
+    cout << endl;
+//
+//
 
 }

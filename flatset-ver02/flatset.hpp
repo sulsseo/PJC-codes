@@ -14,8 +14,6 @@ public:
     // iterator
     // const_iterator
 
-    using base = std::vector<T>;
-
     typedef T value_type;
     typedef size_t size_type;
 
@@ -69,87 +67,76 @@ public:
     template <typename InputIterator>
     void insert(InputIterator first, InputIterator last, std::input_iterator_tag) {
         while(first != last) {
-            m_data.push_back(*first);
+            insert(*first);
             ++first;
         }
-
-        std::sort(m_data.begin(), m_data.end(), m_comp);
-        std::vector<T> tmp;
-
-        auto it = m_data.begin();
-        auto inspect = m_data.end();
-
-        while(it != m_data.end()) {
-            if (it != inspect) {
-                tmp.push_back(*it);
-                inspect = it;
-            }
-            ++it;
-        }
-
-        m_data = std::move(tmp);
     }
 
     template <typename ForwardIterator>
     void insert(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag) {
         // reserve
-        m_data.reserve(m_data.size() + std::distance(first, last));
+//        m_data.reserve(m_data.size() + std::distance(first, last));
+        m_data.reserve(static_cast<unsigned long>(std::distance(first, last)));
+
+        auto dist = std::distance(first, last);
 
         while(first!=last) {
-            // TODO: find duplic, resize
-            m_data.push_back(std::move(*first));
+            insert(*first);
             ++first;
         }
-
-        std::sort(m_data.begin(), m_data.end(), m_comp);
-        std::vector<T> tmp;
-
-        auto it = m_data.begin();
-        auto inspect = m_data.end();
-
-        while (it != m_data.end()) {
-            if (it != inspect) {
-                tmp.push_back(std::move(*it));
-                inspect = it;
-            }
-            ++it;
-        }
-
-        m_data = tmp;
-
     }
 
     // Constructs flat_set from elements in range [first, last)
     template <typename InputIterator>
     flat_set(InputIterator first, InputIterator last) : m_data(), m_comp() {
         insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
-//        insert(first, last);
     }
     template <typename InputIterator>
     flat_set(InputIterator first, InputIterator last, Comparator const& cmp) : flat_set(cmp) {
         insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
-//        insert(first, last);
     }
 
     // Insert overloads
+//    std::pair<iterator, bool> insert(T const& v) {
+////        iterator it = find(v);
+//        iterator it;
+//        iterator lb = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
+//
+//        if (lb != m_data.end() && !m_comp(v, *lb)) it = lb;
+//        else it = end();
+//
+//        if (it != m_data.end()) return {it, false};
+//
+//        it = m_data.insert(lower_bound(v), v);
+//
+//        return {it, true};
+//    };
+
     std::pair<iterator, bool> insert(T const& v) {
-        auto it = find(v);
-        if (it != m_data.end()) return  {it, false};
+//        iterator it = find(v);
+        iterator it;
+        iterator lb = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
 
-        it = m_data.insert(m_data.end(), v);
+        if (lb != m_data.end() && !m_comp(v, *lb)) it = lb;
+        else it = end();
 
-        std::sort(m_data.begin(), m_data.end(), m_comp);
+        if (it != m_data.end()) return {it, false};
 
-        return {end(), true};
+        it = m_data.insert(lb, v);
+
+        return {it, true};
     };
 
     std::pair<iterator, bool> insert(T&& v) {
-        auto it = find(v);
-        if (it != m_data.end()) return  {it, false};
+        iterator it;
+        iterator lb = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
 
-        it = m_data.insert(m_data.end(), std::move(v));
+        if (lb != m_data.end() && !m_comp(v, *lb)) it = lb;
+        else it = end();
 
-        std::sort(m_data.begin(), m_data.end(), m_comp);
+        if (it != m_data.end()) return {it, false};
+
+        it = m_data.insert(lb, std::move(v));
 
         return {it, true};
     };
@@ -157,7 +144,6 @@ public:
     // Erase overloads
     // Deletes element pointed-to by i, returns iterator to the next element
     iterator erase(const_iterator i) {
-//        auto it = m_data.erase(i);
         return m_data.erase(i);
     }
     // Deletes elements in range [first, last), returns iterator to the next element
@@ -187,116 +173,33 @@ public:
         return !m_comp(a, b) && !m_comp(b, a);
     }
 
-    iterator binary_search(int l, int r, T const& x) {
-
-        if (r >= l) {
-            int mid = l + (r - l)/2;
-
-            if (equal(x, m_data[mid]))  return {m_data.begin()+mid};
-
-            if (m_comp(x, m_data[mid])) return binary_search(l, mid-1, x);
-
-            return binary_search(mid+1, r, x);
-        }
-
-        return {end()};
-    }
-
-    const_iterator binary_search(int l, int r, T const& x) const {
-
-        if (r >= l) {
-            int mid = l + (r - l)/2;
-
-            if (equal(x, m_data[mid]))  return {m_data.begin()+mid};
-
-            if (m_comp(x, m_data[mid])) return binary_search(l, mid-1, x);
-
-            return binary_search(mid+1, r, x);
-        }
-
-        return {end()};
-    }
-
     // Lookup member functions
     // Returns iterator to element equivalent to v, or an end iterator if such element is not present
     iterator find(T const& v) {
-
-        if (m_data.size() == 0) return end();
-        else if(m_data.size() == 1) {
-            if (equal(*begin(),v)) return begin();
-            else return end();
-        } else return binary_search(0,m_data.size(),v);
-
-//        auto it = m_data.begin();
-//        auto end = m_data.end();
-//
-//        while (it != end) {
-//            if (equal(*it, v)) {
-//                return it;
-//            }
-//            ++it;
-//        }
-//        return it;
+        iterator first = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
+        if (first != m_data.end() && !m_comp(v, *first)) return first;
+        else return end();
     }
     const_iterator find(T const& v) const {
-//        auto it = m_data.begin();
-//        auto end = m_data.end();
-//        while (it != end) {
-//            if (equal(*it, v)) {
-//                return it;
-//            }
-//            ++it;
-//        }
-//        return it;
-        if (m_data.size() == 0) return end();
-        else if(m_data.size() == 1) {
-            if (equal(*begin(),v)) return begin();
-            else return end();
-        } else return binary_search(0,m_data.size(),v);
+        iterator first = lower_bound(v);
+        if (first != end() && !m_comp(v, *first)) return first;
+        else return end();
     }
 
     // Returns iterator to first element that is not less than t, end iterator if no such element is present
     iterator lower_bound(T const& t) {
-        auto it = end();
-        auto first = begin();
-
-        if (*first > t) return begin();
-        if (*(--it) < t) return end();
-
-        while (*first < t) {
-            ++first;
-        }
-        return first;
+        return std::lower_bound(m_data.begin(), m_data.end(), t, m_comp);
     }
     const_iterator lower_bound(T const& t) const {
-        // TODO: can use find!!!
-        // TOOD: find place to insert new element
-        auto it = end();
-        auto first = begin();
-
-        if (*first > t) return begin();
-        if (*(--first) < t) return end();
-
-        while (*first < t) {
-            ++first;
-        }
-        return first;
+        return std::lower_bound(m_data.begin(), m_data.end(), t, m_comp);
     }
 
     // Returns iterator to first element that is greater than t, end iterator if no such element is present
     iterator upper_bound(T const& t) {
-        auto it = begin();
-        while (*it <= t) {
-            ++it;
-        }
-        return it;
+        return std::upper_bound(m_data.begin(), m_data.end(), t, m_comp);
     }
     const_iterator upper_bound(T const& t) const {
-        auto it = begin();
-        while (*it <= t) {
-            ++it;
-        }
-        return it;
+        return std::upper_bound(m_data.begin(), m_data.end(), t, m_comp);
     }
 
     void swap(flat_set& o) {
