@@ -74,11 +74,7 @@ public:
 
     template <typename ForwardIterator>
     void insert(ForwardIterator first, ForwardIterator last, std::forward_iterator_tag) {
-        // reserve
-//        m_data.reserve(m_data.size() + std::distance(first, last));
-        m_data.reserve(static_cast<unsigned long>(std::distance(first, last)));
-
-        auto dist = std::distance(first, last);
+        m_data.reserve(m_data.size() + std::distance(first, last));
 
         while(first!=last) {
             insert(*first);
@@ -88,8 +84,11 @@ public:
 
     // Constructs flat_set from elements in range [first, last)
     template <typename InputIterator>
-    flat_set(InputIterator first, InputIterator last) : m_data(), m_comp() {
-        insert(first, last, typename std::iterator_traits<InputIterator>::iterator_category{});
+    flat_set(InputIterator first, InputIterator last) : m_data(first, last) {
+        std::sort(m_data.begin(), m_data.end(), m_comp);
+        m_data.erase(std::unique(m_data.begin(), m_data.end(), [&](T const & l, T const& r){
+            return !m_comp(l, r) && !m_comp(r, l);
+        }), m_data.end());
     }
     template <typename InputIterator>
     flat_set(InputIterator first, InputIterator last, Comparator const& cmp) : flat_set(cmp) {
@@ -97,23 +96,7 @@ public:
     }
 
     // Insert overloads
-//    std::pair<iterator, bool> insert(T const& v) {
-////        iterator it = find(v);
-//        iterator it;
-//        iterator lb = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
-//
-//        if (lb != m_data.end() && !m_comp(v, *lb)) it = lb;
-//        else it = end();
-//
-//        if (it != m_data.end()) return {it, false};
-//
-//        it = m_data.insert(lower_bound(v), v);
-//
-//        return {it, true};
-//    };
-
     std::pair<iterator, bool> insert(T const& v) {
-//        iterator it = find(v);
         iterator it;
         iterator lb = std::lower_bound(m_data.begin(), m_data.end(), v, m_comp);
 
