@@ -4,6 +4,8 @@
 
 #format *.nnc
 
-*<number of vertices> <number of edges>*
+<code>
+&lt;number of vertices> &lt;number of edges> <br>
 
-<from> <to> <cost>
+&lt;from> &lt;to> &lt;cost>
+</code>
