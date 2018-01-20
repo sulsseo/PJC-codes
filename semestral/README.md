@@ -1,8 +1,8 @@
-#Semestral work
+# Semestral work
 
 
 
-#format *.nnc
+# format *.nnc
 
 <code>
 &lt;number of vertices> &lt;number of edges> <br>
