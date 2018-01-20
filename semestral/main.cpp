@@ -1,5 +1,6 @@
 #include <iostream>
 
+
 #include "graph.hpp"
 #include "tools.hpp"
 
@@ -11,7 +12,7 @@ std::chrono::milliseconds to_ms(TimePoint tp) {
 int main() {
     auto start = std::chrono::high_resolution_clock::now();
 
-    load_graph("../data/graph1.dat");
+    load_graph("../data/graph2.dat");
 
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "\nRuntime: " << to_ms(end - start).count() << " ms\n";

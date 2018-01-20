@@ -20,6 +20,5 @@ void load_graph(std::string path) {
 
     file >> vertices;
     file >> edges;
-
     
 }
