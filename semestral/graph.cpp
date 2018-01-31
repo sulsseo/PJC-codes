@@ -5,32 +5,40 @@
 
 using namespace std;
 
-void graph::load_nnc_graph(std::string path) {
+void graph::load_nnc(std::string path) {
 
-    ifstream file(path);
+    ifstream file;
+
+    file.open(path);
+    if (!file) {
+        throw std::runtime_error("File not found!");
+    }
 
     file >> this->m_nodes;
     file >> this->m_edges;
 
-    unsigned int from;
-    unsigned int to;
-    unsigned long cost;
+    // allocate data
+
+    size_t from;
+    size_t to;
+    int cost;
 
     for (size_t i = 0; i < this->m_edges; ++i) {
         file >> from;
         file >> to;
         file >> cost;
-        add_data(from, to, cost);
+
+        data[from - 1][to - 1] = cost;
+        data[to - 1][from - 1] = cost;
     }
 }
 
-void graph::print_nodes() {
-    for (auto it = node_by_id.begin(); it != node_by_id.end(); ++it) {
-        cout << it.operator*().second << endl;
-    }
+size_t graph::get_nodes() const {
+    return m_nodes;
 }
 
-void graph::print_edges() {
-    auto it = outcoming_edges.begin().operator*().second.begin();
-    cout << it.operator*() << endl;
+size_t graph::get_edges() const {
+    return m_edges;
 }
+
+

@@ -21,120 +21,28 @@ using namespace std;
 
 class graph {
 private:
+    size_t m_nodes;
+    size_t m_edges;
+//    int **data;
+    std::map<int,std::map<int,int>> data;
 
-    // basic graph node implementation
-    class node {
-    public:
-        node() = default;
+    int minDistance(int dist[], bool visited[]) {
+        int min = INT_MAX, min_index;
 
-        ~node() = default;
+        for (int v = 0; v < m_nodes; v++)
+            if (!visited[v] && dist[v] <= min)
+                min = dist[v], min_index = v;
 
-        node(unsigned int id) : m_id(id) {}
-
-        const unsigned int get_id() const {
-            return m_id;
-        }
-
-        double get_distance_to() const {
-            return m_distance;
-        }
-
-        void set_distance(unsigned long distance) {
-            node::m_distance = distance;
-        }
-
-        void set_id(unsigned int id) {
-            node::m_id = id;
-        }
-
-        bool empty() {
-            return m_id == 0;
-        }
-
-        friend ostream &operator<<(ostream &os, const node &obj) {
-            os << "id: " << obj.get_id();
-            os << ", dist: " << obj.get_distance_to();
-            return os;
-        }
-
-        unsigned int m_id = 0;
-        double m_distance = numeric_limits<double>::infinity();
-    };
-
-    class edge {
-    public:
-        edge(node *from, node *to, unsigned long cost) :
-                m_from(from),
-                m_to(to),
-                m_cost(cost) {}
-
-        ~edge() = default;
-
-        const node *get_from() const {
-            return m_from;
-        }
-
-        const node *get_to() const {
-            return m_to;
-        }
-
-        const unsigned long get_cost() const {
-            return m_cost;
-        }
-
-        friend ostream &operator<<(ostream &os, const edge &obj) {
-            os << "[" << obj.get_from()->get_id() << "]";
-            os << " -- " << obj.get_cost() << " -- ";
-            os << "[" << obj.get_to()->get_id() << "]";
-            return os;
-        }
-
-        const node *m_from;
-        const node *m_to;
-        const unsigned long m_cost;
-    };
-
-    size_t m_nodes{};
-    size_t m_edges{};
-
-    std::map<unsigned int, node> node_by_id;
-    std::map<unsigned int, std::vector<edge>> outcoming_edges;
-
-    void add_data(unsigned int from, unsigned int to, unsigned long cost) {
-        node *n_from;
-        node *n_to;
-
-        if (node_by_id[from].empty()) {
-            node_by_id[from].set_id(from);
-        }
-
-        if (node_by_id[to].empty()) {
-            node_by_id[to].set_id(to);
-        }
-
-        n_from = &node_by_id[from];
-        n_to = &node_by_id[to];
-
-        outcoming_edges[from].emplace_back(n_from, n_to, cost);
-        outcoming_edges[to].emplace_back(n_to, n_from, cost);
+        return min_index;
     }
 
 public:
 
-    graph() = default;
-
-    ~graph() = default;
-
-    /**
-     *
-     * @param nodes
-     * @param edges
-     */
-    graph(size_t nodes, size_t edges) :
-            m_nodes(nodes),
-            m_edges(edges) {
+    graph(std::string path) {
+        load_nnc(path);
     }
 
+    ~graph() = default;
 
     /**
      * load data file from @param path in nnc format:
@@ -143,22 +51,69 @@ public:
      *
      * @param path file path
      */
-    void load_nnc_graph(std::string path);
+    void load_nnc(std::string path);
+
+
+    void print_solution(int *dist) {
+        printf("Vertex   Distance from Source\n");
+        for (int i = 0; i < m_nodes; i++)
+            printf("%d \t\t %d\n", i + 1, dist[i]);
+    }
+
+    void print_matrix() {
+        for (size_t i = 0; i < m_nodes; ++i) {
+            for (size_t j = 0; j < m_nodes; ++j) {
+                cout << data[i][j] << "\t";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
 
     /**
-     * Basic printer
+     * inspired by GeeksForGeeks
+     *
+     * @param src
      */
-    void print_nodes();
+    void dijkstra(int src, int *dist) {
+        bool visited[m_nodes];
 
-    void print_edges();
+        for (int i = 0; i < m_nodes; ++i)
+            dist[i] = INT_MAX, visited[i] = false;
 
-    std::vector<unsigned long> compute_closest_path(unsigned int origin) {
-        std::vector<unsigned long> result(m_nodes);
+        dist[src] = 0;
 
-        // TODO dijkstra
+        int idx = 0;
+        while (idx < m_nodes-1) {
 
-        return result;
+            // find closest neighbour
+            int min = INT_MAX;
+            int index = 0;
+            for (int v = 0; v < m_nodes; ++v)
+                if (!visited[v] && dist[v] <= min)
+                    min = dist[v], index = v;
+
+            visited[index] = true;
+
+            for (int v = 0; v < m_nodes; ++v) {
+                if (!visited[v] &&
+                    data[index][v] != 0 &&
+                    dist[index] != INT_MAX &&
+                    dist[index] + data[index][v] < dist[v]) {
+                    dist[v] = dist[index] + data[index][v];
+                }
+            }
+
+            ++idx;
+        }
+
+//        print_solution(dist, m_nodes);
+//        return dist;
     }
+
+    size_t get_nodes() const;
+
+    size_t get_edges() const;
 };
 
 #endif //SEMESTRAL_GRAPH_HPP
