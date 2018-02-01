@@ -1,11 +1,15 @@
-//
-// Created by Jakub Trmal on 31/01/2018.
-//
+/**
+ * Created by Jakub Trmal on 29/01/2018.
+ *
+ *      Helper class saving prints
+ *
+ */
+
 
 using namespace std;
 
 void no_args() {
-    cout << "No arguments. Graph to process needed!" << endl;
+    cout << "No arguments. graph to process needed!" << endl;
 }
 
 void too_many_args() {
@@ -21,9 +25,11 @@ void help() {
             "usage: semestral source_file [options]\n"
                     "\n"
                     "general options:\n"
-                    "    -t                     multithread computation\n"
                     "    -h   --help            print help\n"
-                    "    -V   --version         print version"
+                    "    -V   --version         print version\n"
+                    "\n"
+                    "additional options:\n"
+                    "    -t                     multithread computation"
          << endl;
 }
 

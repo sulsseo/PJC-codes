@@ -1,35 +1,70 @@
 #include <iostream>
 #include <thread>
+#include <queue>
+#include <condition_variable>
 
 #include "printer.hpp"
 #include "graph.hpp"
 
+std::mutex mtx;
+
+class blocking_bounded_queue {
+public:
+    explicit blocking_bounded_queue(std::size_t size = 10) : size_limit{size}, closing{false} {}
+
+    bool add(int e) {
+        std::unique_lock<std::mutex> lg(mutex);
+        add_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg), [&]() -> bool { return queue.size() < size_limit || closing; });
+        if (closing) {
+            return false;
+        }
+        queue.push(e);
+        take_variable.notify_one();
+        return true;
+    }
+
+    bool take(int &out) {
+        std::unique_lock<std::mutex> lg(mutex);
+        take_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg), [&]() -> bool { return !queue.empty() || closing; });
+        if (queue.empty()) {
+            return false;
+        }
+        out = queue.front();
+        queue.pop();
+        add_variable.notify_one();
+        return true;
+    }
+
+    void close() {
+        std::unique_lock<std::mutex> lg(mutex);
+        closing = true;
+        add_variable.notify_all();
+        take_variable.notify_all();
+    }
+
+    ~blocking_bounded_queue() {
+        close();
+    }
+
+private:
+    std::queue<int> queue;
+    std::size_t size_limit;
+    std::mutex mutex;
+    std::condition_variable take_variable, add_variable;
+    bool closing;
+};
 
 template<typename TimePoint>
 std::chrono::milliseconds to_ms(TimePoint tp) {
     return std::chrono::duration_cast<std::chrono::milliseconds>(tp);
 }
 
-void thread_job(graph graph) {
-    cout << "[DEBUG] thread working.." << endl;
-    // TODO thread job define
-}
-
-void example02(graph graph) {
-    int result[graph.get_nodes()];
-
-    for (int i = 0; i< graph.get_nodes(); ++i) {
-        graph.dijkstra(i, result);
-        graph.print_solution(result);
-    }
-}
-
 int main(int argc, char *argv[]) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    cout << "[DEBUG] pocet argumentu: " << argc - 1 << endl;
-    cout << "[DEBUG] argument: " << argv[0] << endl;
-    cout << "[DEBUG] argument: " << argv[1] << endl;
+//    cout << "[DEBUG] arc: " << argc - 1 << endl;
+//    cout << "[DEBUG] argument: " << argv[0] << endl;
+//    cout << "[DEBUG] arg: " << argv[1] << endl;
 
     if (argc == 1) {
         no_args();
@@ -42,20 +77,50 @@ int main(int argc, char *argv[]) {
             version();
         } else {
             graph graph(argv[1]);
-            example02(graph);
+            int result[graph.get_nodes()];
+
+            for (int i = 0; i < graph.get_nodes(); ++i) {
+                graph.dijkstra(i, result);
+                graph.print_solution(mtx, i, result);
+            }
         }
 
         // multi thread
     } else if (argc == 3) {
 
         if (strcmp(argv[2], "-t") == 0) {
-            unsigned int num_threads = std::thread::hardware_concurrency();
-            cout << "[DEBUG] number of threads to use: " << num_threads << endl;
-
             graph graph(argv[1]);
-//            thread_job(graph);
-//            std::thread t1;
-            // TODO job to thread
+
+            unsigned int num_threads = std::thread::hardware_concurrency();
+
+            blocking_bounded_queue bbq;
+            auto prod = [&]() {
+                for (int i = 0; i < graph.get_nodes(); ++i) {
+                    bbq.add(i);
+                }
+                bbq.close();
+            };
+
+            auto cons = [&]() {
+                int out;
+                int result[graph.get_nodes()];
+
+                while (bbq.take(out)) {
+                    graph.dijkstra(out, result);
+                    graph.print_solution(mtx, out, result);
+                }
+            };
+
+            std::thread t1(prod);
+
+            vector<thread> workers;
+            for (unsigned int i = 0; i < num_threads; ++i) {
+                workers.emplace_back(cons);
+                workers[i].join();
+            }
+
+            t1.join();
+
 
         } else {
             unknown_arg();
@@ -64,7 +129,6 @@ int main(int argc, char *argv[]) {
         too_many_args();
         help();
     }
-
 
     auto end = std::chrono::high_resolution_clock::now();
     std::cout << "\nRuntime: " << to_ms(end - start).count() << " ms\n";

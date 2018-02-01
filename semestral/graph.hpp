@@ -23,24 +23,16 @@ class graph {
 private:
     size_t m_nodes;
     size_t m_edges;
-//    int **data;
     std::map<int,std::map<int,int>> data;
-
-    int minDistance(int dist[], bool visited[]) {
-        int min = INT_MAX, min_index;
-
-        for (int v = 0; v < m_nodes; v++)
-            if (!visited[v] && dist[v] <= min)
-                min = dist[v], min_index = v;
-
-        return min_index;
-    }
 
 public:
 
-    graph(std::string path) {
-        load_nnc(path);
-    }
+    /**
+     * Constructor which load data from given file
+     *
+     * @param path to file with graph data
+     */
+    graph(std::string path);
 
     ~graph() = default;
 
@@ -53,66 +45,44 @@ public:
      */
     void load_nnc(std::string path);
 
+    /**
+     * Thread safe print solution of given data
+     *
+     * @param mtx locker instance
+     * @param distance computed closest distances
+     */
+    void print_solution(std::mutex &mtx, int from, int *distance);
 
-    void print_solution(int *dist) {
-        printf("Vertex   Distance from Source\n");
-        for (int i = 0; i < m_nodes; i++)
-            printf("%d \t\t %d\n", i + 1, dist[i]);
-    }
+    /**
+     * Control print
+     */
+    void print_matrix(std::mutex &mtx);
 
-    void print_matrix() {
-        for (size_t i = 0; i < m_nodes; ++i) {
-            for (size_t j = 0; j < m_nodes; ++j) {
-                cout << data[i][j] << "\t";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
+    /**
+     * instantly increase matrix +1
+     */
+    void increase_matrix();
 
     /**
      * inspired by GeeksForGeeks
      *
-     * @param src
+     * @param origin origin node
+     * @param distance storage to save results
      */
-    void dijkstra(int src, int *dist) {
-        bool visited[m_nodes];
+    void dijkstra(int origin, int *distance);
 
-        for (int i = 0; i < m_nodes; ++i)
-            dist[i] = INT_MAX, visited[i] = false;
-
-        dist[src] = 0;
-
-        int idx = 0;
-        while (idx < m_nodes-1) {
-
-            // find closest neighbour
-            int min = INT_MAX;
-            int index = 0;
-            for (int v = 0; v < m_nodes; ++v)
-                if (!visited[v] && dist[v] <= min)
-                    min = dist[v], index = v;
-
-            visited[index] = true;
-
-            for (int v = 0; v < m_nodes; ++v) {
-                if (!visited[v] &&
-                    data[index][v] != 0 &&
-                    dist[index] != INT_MAX &&
-                    dist[index] + data[index][v] < dist[v]) {
-                    dist[v] = dist[index] + data[index][v];
-                }
-            }
-
-            ++idx;
-        }
-
-//        print_solution(dist, m_nodes);
-//        return dist;
-    }
-
+    /**
+     * Getter for private variable contain number of nodes
+     *
+     * @return number of nodes
+     */
     size_t get_nodes() const;
 
+    /**
+     * Getter for private variable contain number of edges
+     *
+     * @return number of edges
+     */
     size_t get_edges() const;
 };
 
