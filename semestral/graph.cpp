@@ -55,8 +55,6 @@ void graph::print_matrix(std::mutex &mtx) {
     cout << endl;
 }
 
-
-
 void graph::dijkstra(int origin, int *distance) {
     bool visited[m_nodes];
 
@@ -79,10 +77,10 @@ void graph::dijkstra(int origin, int *distance) {
 
         // update cost
         for (int v = 0; v < m_nodes; ++v) {
-            if (!visited[v] &&
+            if (distance[index] + data[index][v] < distance[v] &&
+                !visited[v] &&
                 data[index][v] != 0 &&
-                distance[index] != INT_MAX &&
-                distance[index] + data[index][v] < distance[v]) {
+                distance[index] != INT_MAX) {
                 distance[v] = distance[index] + data[index][v];
             }
         }

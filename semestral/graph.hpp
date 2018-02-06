@@ -21,18 +21,20 @@ using namespace std;
 
 class graph {
 private:
-    size_t m_nodes;
-    size_t m_edges;
+    size_t m_nodes{};
+    size_t m_edges{};
     std::map<int,std::map<int,int>> data;
 
 public:
+
+    graph() = default;
 
     /**
      * Constructor which load data from given file
      *
      * @param path to file with graph data
      */
-    graph(std::string path);
+    explicit graph(std::string path);
 
     ~graph() = default;
 
@@ -64,6 +66,7 @@ public:
     void increase_matrix();
 
     /**
+     * Dijkstra find closest path in rated graph
      * inspired by GeeksForGeeks
      *
      * @param origin origin node

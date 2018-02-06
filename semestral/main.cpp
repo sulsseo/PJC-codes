@@ -14,7 +14,8 @@ public:
 
     bool add(int e) {
         std::unique_lock<std::mutex> lg(mutex);
-        add_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg), [&]() -> bool { return queue.size() < size_limit || closing; });
+        add_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg),
+                          [&]() -> bool { return queue.size() < size_limit || closing; });
         if (closing) {
             return false;
         }
@@ -25,7 +26,8 @@ public:
 
     bool take(int &out) {
         std::unique_lock<std::mutex> lg(mutex);
-        take_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg), [&]() -> bool { return !queue.empty() || closing; });
+        take_variable.wait(reinterpret_cast<unique_lock<__1::mutex> &>(lg),
+                           [&]() -> bool { return !queue.empty() || closing; });
         if (queue.empty()) {
             return false;
         }
@@ -76,12 +78,17 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(argv[1], "-V") == 0 || strcmp(argv[1], "--version") == 0) {
             version();
         } else {
-            graph graph(argv[1]);
-            int result[graph.get_nodes()];
+            try {
+                graph graph(argv[1]);
 
-            for (int i = 0; i < graph.get_nodes(); ++i) {
-                graph.dijkstra(i, result);
-                graph.print_solution(mtx, i, result);
+                int result[graph.get_nodes()];
+
+                for (int i = 0; i < graph.get_nodes(); ++i) {
+                    graph.dijkstra(i, result);
+                    graph.print_solution(mtx, i, result);
+                }
+            } catch (std::runtime_error &e) {
+                cout << e.what() << endl;
             }
         }
 
@@ -89,38 +96,40 @@ int main(int argc, char *argv[]) {
     } else if (argc == 3) {
 
         if (strcmp(argv[2], "-t") == 0) {
-            graph graph(argv[1]);
+            try {
+                graph graph(argv[1]);
+                unsigned int num_threads = std::thread::hardware_concurrency();
 
-            unsigned int num_threads = std::thread::hardware_concurrency();
+                blocking_bounded_queue bbq;
+                auto prod = [&]() {
+                    for (int i = 0; i < graph.get_nodes(); ++i) {
+                        bbq.add(i);
+                    }
+                    bbq.close();
+                };
 
-            blocking_bounded_queue bbq;
-            auto prod = [&]() {
-                for (int i = 0; i < graph.get_nodes(); ++i) {
-                    bbq.add(i);
+                auto cons = [&]() {
+                    int out;
+                    int result[graph.get_nodes()];
+
+                    while (bbq.take(out)) {
+                        graph.dijkstra(out, result);
+                        graph.print_solution(mtx, out, result);
+                    }
+                };
+
+                std::thread t1(prod);
+
+                vector<thread> workers;
+                for (unsigned int i = 0; i < num_threads; ++i) {
+                    workers.emplace_back(cons);
+                    workers[i].join();
                 }
-                bbq.close();
-            };
 
-            auto cons = [&]() {
-                int out;
-                int result[graph.get_nodes()];
-
-                while (bbq.take(out)) {
-                    graph.dijkstra(out, result);
-                    graph.print_solution(mtx, out, result);
-                }
-            };
-
-            std::thread t1(prod);
-
-            vector<thread> workers;
-            for (unsigned int i = 0; i < num_threads; ++i) {
-                workers.emplace_back(cons);
-                workers[i].join();
+                t1.join();
+            } catch (std::runtime_error &e) {
+                cout << e.what() << endl;
             }
-
-            t1.join();
-
 
         } else {
             unknown_arg();
