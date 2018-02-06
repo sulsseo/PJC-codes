@@ -1,6 +1,6 @@
 # PJC - Semestrální práce 
 
-### 1. zadání
+### Zadání
 
 Nejkratší cesty mezi všemi vrcholy (shortest paths)
 
@@ -10,21 +10,50 @@ Další z velmi dobře prozkoumaných grafových algoritmů, které mají využi
 - jednovláknová aplikace
 - vícevláknová aplikace
 
-### 2. implementace
+### Implementace
+
+Aplikace načte předaná data do vlastní grafové struktury, která je optimalizovaná 
+pro jednorázové načtení a poté častý přístup k datům.
+
+K prohledávání nezáporně ohodnocených hran grafu je použit [dijkstrův algoritmus](https://cs.wikipedia.org/wiki/Dijkstrův_algoritmus).
+
+Ve vícevláknové verzi je prohledávání z jednotlivých počátečních vrcholů delegováno vždy dalšímu volnému vláknu.
+
+Na výstupu je poté seznam nejkratších vzdáleností z daného počátečního vrcholu do všech ostatních vrcholů grafu.
 
 
-
-### 3. použití
+### Použití
 
 Aplikace se spouští konzolovým voláním:
 
-<code>semestral [cesta-k-datum] [přepínač]</code>
+```
+semestral [cesta-k-datum] [přepínač]</code>
+```
 
-<b>[cesta-k-datum]</b> - aplikace přijímá strukturovaná data grafu:
+- [cesta-k-datum] - aplikace přijímá strukturovaná data grafu
 
-<code>
-&lt;number-of-nodes> &lt;number-of-edges> <br>
-&lt;from> &lt;to> &lt;cost>
-</code>
+- [přepínač] - je možné zvolit přepínač "-t" pro výpočet ve více vláknech
 
-<b>[přepínač]</b> - je možné zvolit přepínač "-t" pro výpočet ve více vláknech
+##### struktura dat
+
+```
+[number-of-nodes] [number-of-edges]
+[from] [to] [cost]
+```
+
+##### Help
+
+```
+usage: semestral source_file [options]
+   
+   general options:
+       -h   --help            print help
+       -V   --version         print version
+   
+   additional options:
+       -t                     multithread computation
+```
+
+### Měření
+
+Na větších datech byla vícevláknová verze mírně lepší než jednovláknová.   
